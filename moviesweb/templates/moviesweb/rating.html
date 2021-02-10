@@ -1,0 +1,31 @@
+{% extends "moviesweb/base.html" %}
+
+{% block content %}
+<section class="result">
+
+
+    <div class="container">
+        <div class="movies">
+            <div class="rating__title">
+                <h1>Users rating of movies from GTM</h1>
+            </div>
+
+            {% for movie in object_list %}
+
+            <div class="rating__item">
+
+                <label style="color: limegreen;" >{{movie}}</label>
+                  <p style="color: white;">USERS RATING: {{movie.avg_rating}}</p>
+
+                <p style="color: #FFF8DC;">{{movie.description}}</p>
+                <a href="{% url 'movies' %}?query={{movie}}">
+                    <button>click here to check this movie in TMDB database</button></a>
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+</section>
+
+{% endblock content %}
