@@ -7,7 +7,8 @@
 import django.contrib.auth.models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import TextField, CharField, DateTimeField
+from django.db.models.fields import CharField, TextField, IntegerField, DateTimeField
+from django.db.models.fields.related import ForeignKey
 
 
 class Movie(models.Model):
@@ -26,18 +27,21 @@ class Review(models.Model):
     """
     Review model - represents feedback and rating of a movie from our database
     """
-    writer = models.ForeignKey(django.contrib.auth.models.User, on_delete=models.CASCADE)
-    reviewed_movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='reviews')
-    review_title = models.CharField(max_length=100)
-    content = models.TextField()
-    rating = models.IntegerField(default=5, validators=[MinValueValidator(1),
-                                                        MaxValueValidator(10)])
+    writer: ForeignKey = models.ForeignKey(django.contrib.auth.models.User,
+                                           on_delete=models.CASCADE)
+    reviewed_movie: ForeignKey = models.ForeignKey(Movie, on_delete=models.CASCADE,
+                                                   related_name='reviews')
+    review_title: CharField = models.CharField(max_length=100)
+    content: TextField = models.TextField()
+    rating: IntegerField = models.IntegerField(default=5,
+                                               validators=[MinValueValidator(1),
+                                                           MaxValueValidator(10)])
 
 
 class Comment(models.Model):
     """
     Comment model - represents a comment made by a user of our application about a particular video
     """
-    movie = models.ForeignKey(Movie, on_delete=models.CASCADE)
-    comment_text = models.CharField(max_length=255)
-    created_at = models.DateTimeField(auto_now=True)
+    movie: ForeignKey = models.ForeignKey(Movie, on_delete=models.CASCADE)
+    comment_text: CharField = models.CharField(max_length=255)
+    created_at: DateTimeField = models.DateTimeField(auto_now=True)

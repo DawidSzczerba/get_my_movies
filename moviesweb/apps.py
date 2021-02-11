@@ -4,4 +4,4 @@ from django.apps import AppConfig
 
 class MovieswebConfig(AppConfig):
     """Out project contain one app = 'moviesweb'"""
-    name = 'moviesweb'
+    name: str = 'moviesweb'
