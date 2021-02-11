@@ -1,7 +1,7 @@
-from django.contrib import admin
+"""
+URLs for moviesweb application
+"""
 from django.urls import path
-from django.conf.urls import url
-from rest_framework import routers
 
 from moviesweb.views import RatingViewList
 from . import views

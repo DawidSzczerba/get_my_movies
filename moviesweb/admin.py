@@ -1,3 +1,7 @@
+"""
+The admin module contains information about the admin capabilities of this application
+"""
+
 from django.contrib import admin
 
 # Register your models here.

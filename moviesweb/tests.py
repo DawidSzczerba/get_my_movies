@@ -1,3 +1,8 @@
+"""
+Testing of moviesweb application url's and url's of the whole get-my-movies project. Tests check if
+the url's are using the correct views and if a connection to the page is possible and if the status
+of the connection is appropriate: the most common should be status = 200
+"""
 from django.contrib.auth.views import LoginView
 from django.test import TestCase, Client
 from django.urls import reverse, resolve
@@ -8,7 +13,16 @@ from moviesweb.views import movies, signup, logout_request
 
 
 class URLTest(TestCase):
+    """
+    Testing of moviesweb application url's and url's of the whole get-my-movies project. Tests check
+    if the url's are using the correct views and if a connection to the page is possible and if
+    the status of the connection is appropriate: the most common should be status = 200
+    """
     def test_movies_url(self):
+        """
+        Tests movies url - connected with view movies
+        :rtype: object
+        """
         url = reverse('movies')
         self.assertEqual(resolve(url).func, movies)
 
@@ -17,6 +31,10 @@ class URLTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_login_url(self):
+        """
+        Tests login url - connected with login view
+        :rtype: object
+        """
         url = reverse('login')
         self.assertEqual(resolve(url).func.__name__, LoginView.__name__)
 
@@ -25,6 +43,10 @@ class URLTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_signup_url(self):
+        """
+        Tests signup url - connected with signup view
+        :rtype: object
+        """
         url = reverse('signup')
         self.assertEqual(resolve(url).func.__name__, signup.__name__)
 
@@ -33,6 +55,10 @@ class URLTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_logout_url(self):
+        """
+        Tests logout url - connected with logout view
+        :rtype: object
+        """
         url = reverse('logout')
         self.assertEqual(resolve(url).func.__name__, logout_request.__name__)
 
@@ -42,17 +68,30 @@ class URLTest(TestCase):
 
 
 class MovieTest(APITestCase):
+    """
+    This class contains tests for the endpoint /my_movies
+    """
     client = APIClient()
 
     def test_post_movie_with_own_description(self):
+        """
+        Test if it is possible to use the post method and add a video to the database with
+        a description written by the user
+        :rtype: object
+        """
         response = self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'MOJ TESTOWY OPIS'
         })
         self.assertEqual(response.data['title'], 'cat')
-        self.assertEquals(response.data['description'], 'MOJ TESTOWY OPIS')
+        self.assertEqual(response.data['description'], 'MOJ TESTOWY OPIS')
         self.assertEqual(response.status_code, 201)
 
     def test_post_movie_with_description_tmdb(self):
+        """
+        Test if it is possible to use the post method and add with it to the database a movie with
+        the description taken from The Movies Database Library API using the tmdbsimple library
+        :rtype: object
+        """
         title = 'Joker'
         response = self.client.post('/my_movies/', data={
             'title': title, 'description': ''
@@ -61,16 +100,25 @@ class MovieTest(APITestCase):
         description_from_tmdb = tmdb.Search().movie(query=title)['results'][0]['overview']
 
         self.assertEqual(response.data['title'], 'Joker')
-        self.assertEquals(response.data['description'], description_from_tmdb)
+        self.assertEqual(response.data['description'], description_from_tmdb)
         self.assertEqual(response.status_code, 201)
 
     def test_post_movie_no_title(self):
+        """
+        Checks if we get a corresponding error when trying to upload a movie without a title -
+        this should not be possible and the status code should be 400
+        :rtype: object
+        """
         response = self.client.post('/my_movies/', data={
             'title': '', 'description': ''
         })
         self.assertEqual(response.status_code, 400)
 
     def test_get_movies(self):
+        """
+        Test get method for movies
+        :rtype: object
+        """
         self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'ala ma kota',
         })
@@ -82,9 +130,17 @@ class MovieTest(APITestCase):
 
 
 class CommentTest(APITestCase):
+    """
+    This class contains tests for the endpoint /comments
+    """
     client = APIClient()
 
     def test_post_comment(self):
+        """
+        Checks if it is possible to add a comment and if we get the right responses from the
+        database
+        :rtype: object
+        """
         self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'ala ma kota',
         })
@@ -95,6 +151,10 @@ class CommentTest(APITestCase):
         self.assertEqual(response.data['comment_text'], 'ala ma psa')
 
     def test_get_comments(self):
+        """
+        Checks if it is possible to use get method for comments and checks if we get right responses
+        :rtype: object
+        """
         self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'ala ma kota',
         })
@@ -104,6 +164,10 @@ class CommentTest(APITestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_get_filtered_comments(self):
+        """
+        Checks if it is possible to get comments for a given movie - test of get method
+        :rtype: object
+        """
         self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'ads',
         })
@@ -116,9 +180,17 @@ class CommentTest(APITestCase):
 
 
 class ReviewTest(APITestCase):
+    """
+    This class contains tests for the endpoint /reviews
+    """
     client = APIClient()
 
     def test_post_review(self):
+        """
+        Checks if it is possible to add a review and if we get the right responses from the
+        database
+        :rtype: object
+        """
         self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'ads',
         })
@@ -139,6 +211,11 @@ class ReviewTest(APITestCase):
         self.assertEqual(response.data['reviewed_movie'], 1)
 
     def test_get_review(self):
+        """
+        Checks if it is possible to use get method for reviews and if we get the right
+        responses from the database
+        :rtype: object
+        """
         self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'ads',
         })
@@ -161,6 +238,10 @@ class ReviewTest(APITestCase):
         self.assertEqual(len(response.data), 2)
 
     def test_get_filtered_comments(self):
+        """
+        Checks if it is possible to get reviews for a given movie - test of get method
+        :rtype: object
+        """
         self.client.post('/my_movies/', data={
             'title': 'cat', 'description': 'ads',
         })

@@ -1,5 +1,5 @@
 """
-saadsasd
+Class with all views in moviesweb application
 """
 from configparser import ConfigParser
 
@@ -7,35 +7,36 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
+import django.contrib.auth.models
 from django.db.models import Avg
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
-import tmdbsimple as tmdb
 from django.views.generic import ListView
+
+import tmdbsimple as tmdb
+
 from requests import HTTPError
 
 from rest_framework import viewsets, status
-from rest_framework.exceptions import NotAuthenticated, APIException, ParseError
+from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
-from rest_framework.status import HTTP_401_UNAUTHORIZED, HTTP_503_SERVICE_UNAVAILABLE, HTTP_422_UNPROCESSABLE_ENTITY
 
 from moviesweb.forms import SignUpForm
 from moviesweb.models import Comment, Movie, Review
-from moviesweb.serializers import UserSerializer, CommentSerializer, MovieSerializer, ReviewSerializer
+from moviesweb.serializers import UserSerializer, CommentSerializer, MovieSerializer, \
+    ReviewSerializer
 
 config = ConfigParser()
 config.read('moviesweb/config.cfg')
-# print(os.getcwd())
 tmdb.API_KEY = config['tmdb']['API_KEY']
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
+class UserViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
+    queryset = django.contrib.auth.models.User.objects.all()
     serializer_class = UserSerializer
 
 
-class MovieViewSet(viewsets.ModelViewSet):
+class MovieViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
     queryset = Movie.objects.all().order_by('-created_at')
     serializer_class = MovieSerializer
 
@@ -51,9 +52,10 @@ class MovieViewSet(viewsets.ModelViewSet):
 
         try:
             results_from_tmdb = tmdb.Search().movie(query=request.data['title'])['results']
-        except HTTPError as e:
+        except HTTPError as http_error:
             raise ParseError(
-                detail="Malformed Request. A movie with this title does not exist or the movie you specified is empty ")
+                detail="Malformed Request. A movie with this title does not exist or the movie"
+                       " you specified is empty ") from http_error
 
         overview = request.data['description']
         if not overview:
@@ -70,7 +72,7 @@ class MovieViewSet(viewsets.ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
 
@@ -82,11 +84,15 @@ class CommentViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(viewsets.ModelViewSet):  # pylint: disable=too-many-ancestors
     serializer_class = ReviewSerializer
     queryset = Review.objects.all().order_by('-rating')
 
     def get_queryset(self):
+        """
+
+        :rtype: object
+        """
         queryset = Review.objects.all()
         movie_id = self.request.query_params.get('reviewed_movie_id', None)
         if movie_id is not None:
@@ -99,12 +105,16 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return queryset
 
 
-class RatingViewList(LoginRequiredMixin, ListView):
+class RatingViewList(LoginRequiredMixin, ListView):  # pylint: disable=too-many-ancestors
     model = Review
     template_name = "moviesweb/rating.html"
     context_object_name = "movies"
 
     def get_queryset(self):
+        """
+
+        :rtype: object
+        """
         return Movie.objects.annotate(avg_rating=Avg('reviews__rating')).order_by('-avg_rating')
 
 
