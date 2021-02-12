@@ -12,6 +12,10 @@ To use our application you need to clone this repository:
 
 $ git clone https://github.com/DawidSzczerba/get_my_movies
 
+Then you need to install all the required libraries
+
+$ pip install -r requirements.txt
+
 Then you need to apply the already created database migrations:
 
 $ python manage.py migrate
